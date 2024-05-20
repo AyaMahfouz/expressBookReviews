@@ -16,6 +16,14 @@ const checkUsername = (uname)=>{
     }
 }
 
+retrieveAllBooks = ()=>{
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve(books);
+        }, 1000);
+    });
+}
+
 public_users.post("/register", (req,res) => {
   //Write your code here
   const uname = req.body.username;
@@ -35,57 +43,81 @@ public_users.post("/register", (req,res) => {
 });
 
 // Get the book list available in the shop
-public_users.get('/',function (req, res) {
+public_users.get('/',async function (req, res) {
   //Write your code here
-  return res.send(JSON.stringify(books,null,4));
+  try{
+    const allBooks = await retrieveAllBooks();
+    return res.send(JSON.stringify(books,null,4));
+  }
+  catch{
+    res.status(500).json({message: "Internal Server Error"});
+  }
   //return res.status(300).json({message: "Yet to be implemented"});
 });
 
 // Get book details based on ISBN
-public_users.get('/isbn/:isbn',function (req, res) {
+public_users.get('/isbn/:isbn',async function (req, res) {
   //Write your code here
-  let isbnBook = books[req.params.isbn];
-  return res.send(JSON.stringify(isbnBook,null,4));
+  try{
+    const allBooks = await retrieveAllBooks();
+    let isbnBook = allBooks[req.params.isbn];
+    return res.send(JSON.stringify(isbnBook,null,4));
+  }
+  catch{
+    res.status(500).json({message: "Internal Server Error"});
+  }
   //return res.status(300).json({message: "Yet to be implemented"});
  });
   
 // Get book details based on author
-public_users.get('/author/:author',function (req, res) {
+public_users.get('/author/:author',async function (req, res) {
   //Write your code here
-    let q_author = req.params.author.toLowerCase();
-    let selectedBook = [];
-    
-    selectedBook = Object.values(books).filter((book)=>{
-        return book.author.toLowerCase() === q_author;
-    });
+    try{
+        const allBooks = await retrieveAllBooks();
+        let q_author = req.params.author.toLowerCase();
+        let selectedBook = [];
+        
+        selectedBook = Object.values(allBooks).filter((book)=>{
+            return book.author.toLowerCase() === q_author;
+        });
 
-    
-    if(selectedBook.length>0){
-        return res.send(JSON.stringify(selectedBook,null,4));
+        
+        if(selectedBook.length>0){
+            return res.send(JSON.stringify(selectedBook,null,4));
+        }
+        else{
+            return res.status(300).json({message:"Author not found"});
+        }
     }
-    else{
-        return res.status(300).json({message:"Author not found"});
+    catch{
+        res.status(500).json({message: "Internal Server Error"});
     }
   //return res.status(300).json({message: "Yet to be implemented"});
 });
 
 // Get all books based on title
-public_users.get('/title/:title',function (req, res) {
+public_users.get('/title/:title',async function (req, res) {
   //Write your code here
-  let q_title = req.params.title.toLowerCase();
-  let selectedBook = [];
-  
-  selectedBook = Object.values(books).filter((book)=>{
-      return book.title.toLowerCase() === q_title;
-  });
+    try{
+        const allBooks = await retrieveAllBooks();
+        let q_title = req.params.title.toLowerCase();
+        let selectedBook = [];
+        
+        selectedBook = Object.values(allBooks).filter((book)=>{
+            return book.title.toLowerCase() === q_title;
+        });
 
-  
-  if(selectedBook.length>0){
-      return res.send(JSON.stringify(selectedBook,null,4));
-  }
-  else{
-      return res.status(300).json({message:"Book title not found"});
-  }
+        
+        if(selectedBook.length>0){
+            return res.send(JSON.stringify(selectedBook,null,4));
+        }
+        else{
+            return res.status(300).json({message:"Book title not found"});
+        }
+    }
+    catch{
+        res.status(500).json({message: "Internal Server Error"});
+    }
   //return res.status(300).json({message: "Yet to be implemented"});
 });
 

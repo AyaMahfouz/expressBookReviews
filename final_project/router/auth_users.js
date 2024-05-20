@@ -44,8 +44,32 @@ regd_users.post("/login", (req,res) => {
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+    //Write your code here
+    let user = req.session.authorization.username;
+    let new_review = req.body.reviews;
+    let reviewed_book = books[req.params.isbn];
+    console.log(user);
+    console.log(new_review);
+    console.log(reviewed_book);
+    if(reviewed_book){
+        reviewed_book.reviews[user] = new_review;
+        return res.status(200).send("Review successfully posted");
+    }else{
+        return res.status(404).json({message:"Book not found"});
+    }
+  //return res.status(300).json({message: "Yet to be implemented"});
+});
+
+
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+    let user = req.session.authorization.username;
+    let reviewed_book = books[req.params.isbn];
+    if(reviewed_book){
+        reviewed_book.reviews[user] = "";
+        return res.status(200).send("Review successfully deleted");
+    }else{
+        return res.status(404).json({message:"Book not found"});
+    }
 });
 
 module.exports.authenticated = regd_users;
